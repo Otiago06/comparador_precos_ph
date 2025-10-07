@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Valor de Papel Higiênico</title>
+    <!-- Adicionando meta tag de cor do tema para PWA -->
+    <meta name="theme-color" content="#4f46e5"/>
+    
+    <!-- Metatags solicitadas: Autor e Descrição -->
+    <meta name="author" content="Tiago Oliveira">
+    <meta name="description" content="Comparador de preço por metro para papel higiênico e similares, com foco em economia no supermercado.">
+    
+    <!-- Favicon: Ícone circular com $ para barra de títulos do navegador -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%234f46e5'/%3E%3Cpath fill='white' d='M12 4C7.58 4 4 7.58 4 12s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm1 13h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E">
+
+    <!-- O link do manifest será adicionado dinamicamente via JavaScript para funcionar no modelo de arquivo único. -->
+
+    <!-- Carregamento do Tailwind CSS para estilo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuração de fonte e cor de fundo para a aplicação */
+        html, body {
+            height: 100%; /* Garantir que o body e html ocupem toda a altura */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0; /* Cor de fundo um pouco mais escura para contraste */
+            display: flex; /* Usar flexbox para centralizar/alinhar o conteúdo */
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem; /* Padding original mantido */
+        }
+        /* Estilo para a célula de melhor valor */
+        .best-value {
+            background-color: #d1fae5; /* Verde claro */
+            font-weight: 700;
+            border-left: 4px solid #059669; /* Borda esquerda mais grossa para destaque */
+        }
+        /* Estilo para a tabela em mobile */
+        @media (max-width: 640px) {
+            .best-value {
+                border-radius: 0.5rem; /* Arredonda a linha na versão mobile */
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- Container Principal (simulando a tela de um app) -->
+    <div class="w-full max-w-md bg-white shadow-2xl rounded-2xl p-6 md:p-8 my-4">
+
+        <!-- Header do App -->
+        <header class="mb-6 pb-2 border-b border-gray-100">
+            
+            <!-- Novo Ícone Circular e Título Centralizado -->
+            <div class="flex flex-col items-center justify-center mb-3">
+                
+                <!-- Círculo com Ícone de $ (Cor indigo-600) -->
+                <div class="bg-indigo-600 rounded-full p-3 shadow-lg mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 00-1-1H9a1 1 0 000 2h1a1 1 0 011 1v3a1 1 0 11-2 0V9H8a1 1 0 000 2h1a1 1 0 011 1v3a1 1 0 102 0v-3.25A2.75 2.75 0 0010 8.5V6z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                
+                <h1 class="text-3xl font-extrabold text-indigo-700">Cálculo PH</h1>
+            </div>
+            
+            <!-- Descrição Levemente Reduzida (text-base) -->
+            <p class="text-base text-gray-800 text-center">Comparador de Papel Higiênico</p>
+        </header>
+
+        <!-- Formulário de Entrada de Dados -->
+        <form id="comparison-form" class="space-y-4">
+            
+            <!-- Campo de Rótulo/Marca (Opcional, mas útil) -->
+            <div>
+                <label for="label" class="block text-sm font-medium text-gray-700">Rótulo/Marca (Ex: Pacote Azul)</label>
+                <input type="text" id="label" placeholder="Opção 1" class="mt-1 block w-full rounded-xl border-gray-300 shadow-inner p-3 focus:border-indigo-600 focus:ring-indigo-600 transition duration-150 ease-in-out" required>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <!-- Quantidade de Rolos -->
+                <div>
+                    <label for="rolls" class="block text-sm font-medium text-gray-700 text-center">Nº de Rolos</label>
+                    <input type="number" id="rolls" min="1" placeholder="12" class="mt-1 block w-full rounded-xl border-gray-300 shadow-inner p-3 text-center focus:border-indigo-600 focus:ring-indigo-600" required>
+                </div>
+                <!-- Metragem por Rolo -->
+                <div>
+                    <label for="metersPerRoll" class="block text-sm font-medium text-gray-700 text-center">Metros/Rolo</label>
+                    <input type="number" id="metersPerRoll" min="1" placeholder="20" class="mt-1 block w-full rounded-xl border-gray-300 shadow-inner p-3 text-center focus:border-indigo-600 focus:ring-indigo-600" required>
+                </div>
+                <!-- Preço Total do Pacote -->
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700 text-center">Preço (R\$)</label>
+                    <input type="number" id="price" min="0.01" step="0.01" placeholder="10.80" class="mt-1 block w-full rounded-xl border-gray-300 shadow-inner p-3 text-center focus:border-indigo-600 focus:ring-indigo-600" required>
+                </div>
+            </div>
+
+            <!-- Botão de Adicionar Opção (Maior e mais tátil) -->
+            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition duration-200 transform hover:scale-[1.01]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Adicionar Opção
+            </button>
+        </form>
+
+        <!-- Tabela de Resultados (Histórico) -->
+        <div class="mt-8 pt-4 border-t border-gray-100">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Resultados da Comparação</h2>
+            
+            <!-- Mensagem de lista vazia -->
+            <p id="empty-message" class="text-center text-gray-500 py-4 italic">Nenhuma opção adicionada ainda. Adicione a primeira!</p>
+
+            <div class="overflow-x-auto rounded-lg shadow-inner">
+                <table id="comparison-table" class="min-w-full divide-y divide-gray-200 hidden">
+                    <thead class="bg-indigo-100/50">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Opção</th>
+                            <th class="px-3 py-3 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Total (m)</th>
+                            <th class="px-3 py-3 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">R\$/m</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white divide-y divide-gray-100">
+                        <!-- Linhas de comparação serão injetadas aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botão de Limpar Lista -->
+            <button id="clear-button" class="mt-4 w-full text-sm text-red-600 bg-red-100 py-2 rounded-xl hover:bg-red-200 transition duration-200 font-semibold hidden">
+                Limpar Lista (Recomeçar)
+            </button>
+
+        </div>
+    </div>
+    
+    <!-- Rodapé/Footer Adicionado -->
+    <footer class="mt-8 pb-4 w-full max-w-md text-center text-sm text-gray-500">
+        ©2025 - Tiago Oliveira - Todos Direitos Reservados
+    </footer>
+
+    <script>
+        // Array para armazenar as opções de papel higiênico (histórico temporário)
+        let comparisonData = [];
+        let labelCounter = 1;
+
+        const form = document.getElementById('comparison-form');
+        const tableBody = document.getElementById('table-body');
+        const comparisonTable = document.getElementById('comparison-table');
+        const emptyMessage = document.getElementById('empty-message');
+        const clearButton = document.getElementById('clear-button');
+
+        // --- PWA: CONFIGURAÇÃO DO MANIFEST E SERVICE WORKER ---
+        
+        // 1. Definição do conteúdo do Manifest
+        const manifestContent = {
+            name: "Cálculo Smart",
+            short_name: "Smart Calc",
+            description: "Comparador de preço por metro para papel higiênico.",
+            start_url: "./index.html",
+            display: "standalone",
+            background_color: "#e2e8f0",
+            theme_color: "#4f46e5",
+            icons: [
+                // Usando o novo ícone circular para o PWA
+                {
+                    src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%234f46e5'/%3E%3Cpath fill='white' d='M12 4C7.58 4 4 7.58 4 12s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm1 13h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E",
+                    sizes: "192x192",
+                    type: "image/svg+xml"
+                },
+                {
+                    src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%234f46e5'/%3E%3Cpath fill='white' d='M12 4C7.58 4 4 7.58 4 12s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm1 13h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E",
+                    sizes: "512x512",
+                    type: "image/svg+xml"
+                }
+            ]
+        };
+
+        // 2. Definição do conteúdo do Service Worker
+        const serviceWorkerCode = `
+            const CACHE_NAME = 'calculo-smart-v1';
+            
+            // A URL do documento principal para ser armazenada em cache
+            const urlsToCache = [location.href.split('?')[0].split('#')[0]];
+
+            self.addEventListener('install', (event) => {
+                // Força o Service Worker a ser ativado imediatamente
+                self.skipWaiting();
+                event.waitUntil(
+                    caches.open(CACHE_NAME)
+                        .then((cache) => {
+                            console.log('SW: Cache aberto. Armazenando documento principal.');
+                            return cache.addAll(urlsToCache); 
+                        })
+                        .catch(err => console.error('SW: Erro ao armazenar em cache:', err))
+                );
+            });
+
+            self.addEventListener('fetch', (event) => {
+                // Estratégia Cache-First
+                event.respondWith(
+                    caches.match(event.request)
+                        .then((response) => {
+                            // Retorna o item do cache se encontrado
+                            if (response) {
+                                return response;
+                            }
+                            // Caso contrário, busca na rede
+                            return fetch(event.request);
+                        })
+                );
+            });
+
+            self.addEventListener('activate', (event) => {
+                console.log('SW: Ativado. Limpando caches antigos.');
+                event.waitUntil(
+                    // Remove caches antigos
+                    caches.keys().then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.filter(cacheName => cacheName !== CACHE_NAME)
+                                .map(cacheName => caches.delete(cacheName))
+                        );
+                    })
+                );
+            });
+        `;
+        
+        // 3. Registro Dinâmico do Manifest e do Service Worker
+        document.addEventListener('DOMContentLoaded', () => {
+            // A. Criação e Inserção do Manifest
+            const manifestBlob = new Blob([JSON.stringify(manifestContent)], { type: 'application/manifest+json' });
+            const manifestUrl = URL.createObjectURL(manifestBlob);
+            
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+            
+            // B. Registro do Service Worker
+            if ('serviceWorker' in navigator) {
+                const swBlob = new Blob([serviceWorkerCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => console.log('PWA: Service Worker registrado com sucesso.'))
+                    .catch(err => console.log('PWA: Falha no registro do Service Worker.', err));
+            }
+            
+            // Inicializa a interface (lógica original)
+            document.getElementById('label').value = `Opção ${labelCounter}`;
+            renderTable(); 
+        });
+
+
+        // --- LÓGICA DO COMPARADOR DE PREÇOS (EXISTENTE) ---
+
+        /**
+         * Adiciona uma nova opção à lista, calcula métricas e re-renderiza a tabela.
+         */
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Captura dos valores do formulário
+            const labelInput = document.getElementById('label');
+            const rolls = parseFloat(document.getElementById('rolls').value);
+            const metersPerRoll = parseFloat(document.getElementById('metersPerRoll').value);
+            const price = parseFloat(document.getElementById('price').value);
+
+            // Validação simples
+            if (isNaN(rolls) || isNaN(metersPerRoll) || isNaN(price) || rolls <= 0 || metersPerRoll <= 0 || price <= 0) {
+                 // Usar uma mensagem visível em vez de alert()
+                console.error("Por favor, preencha todos os campos com valores positivos.");
+                // Poderíamos adicionar um modal ou um span de erro aqui, mas por simplicidade, manteremos o log.
+                return; 
+            }
+
+            // Se o usuário não preencheu o rótulo, usa um número sequencial
+            const label = labelInput.value.trim() || `Opção ${labelCounter}`;
+            
+            // 1. Cálculo da Metragem Total
+            const totalMeters = rolls * metersPerRoll;
+            
+            // 2. Cálculo do Preço por Metro (R$/m)
+            const pricePerMeter = price / totalMeters;
+
+            // Cria o objeto da nova opção
+            const newOption = {
+                id: Date.now(), // Adiciona um ID único para futura exclusão (se necessário)
+                label: label,
+                rolls: rolls,
+                metersPerRoll: metersPerRoll,
+                price: price,
+                totalMeters: totalMeters,
+                pricePerMeter: pricePerMeter
+            };
+
+            comparisonData.push(newOption);
+            
+            // Incrementa o contador para o próximo rótulo automático
+            labelCounter++;
+
+            // Limpa o formulário e re-renderiza
+            form.reset();
+            // Mantém o rótulo como o próximo número sequencial
+            labelInput.value = `Opção ${labelCounter}`; 
+
+            renderTable();
+        });
+
+        /**
+         * Renderiza a tabela de comparação, encontra e destaca a melhor opção.
+         */
+        function renderTable() {
+            tableBody.innerHTML = '';
+
+            if (comparisonData.length === 0) {
+                // Esconde a tabela e mostra a mensagem de lista vazia
+                comparisonTable.classList.add('hidden');
+                emptyMessage.classList.remove('hidden');
+                clearButton.classList.add('hidden');
+                return;
+            }
+
+            // Exibe a tabela e esconde a mensagem
+            comparisonTable.classList.remove('hidden');
+            emptyMessage.classList.add('hidden');
+            clearButton.classList.remove('hidden');
+
+            // Encontra a melhor opção (menor preço por metro)
+            // Filtra para garantir que não haja NaN, embora a validação do formulário deva impedir isso.
+            const validData = comparisonData.filter(opt => !isNaN(opt.pricePerMeter) && opt.pricePerMeter > 0);
+            
+            let bestValue = validData.length > 0 ? validData.reduce((min, current) => 
+                (current.pricePerMeter < min.pricePerMeter ? current : min), validData[0]
+            ) : null;
+            
+            // Itera sobre os dados e cria as linhas da tabela
+            comparisonData.forEach(option => {
+                const isBestValue = bestValue && option.pricePerMeter === bestValue.pricePerMeter;
+                
+                const row = tableBody.insertRow();
+                // Aplica a classe de destaque se for a melhor opção
+                // Note: p-3 adicionado para aumentar a área de toque em mobile
+                row.className = isBestValue ? 'best-value transition duration-300' : 'hover:bg-gray-50';
+
+                // Célula 1: Rótulo
+                let cell1 = row.insertCell();
+                cell1.className = "px-3 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900";
+                cell1.innerHTML = `
+                    <p class="font-bold">${option.label}</p>
+                    <p class="text-xs text-gray-500">${option.rolls}x${option.metersPerRoll}m @ R$${option.price.toFixed(2).replace('.', ',')}</p>
+                `;
+                
+                // Célula 2: Metragem Total
+                let cell2 = row.insertCell();
+                cell2.className = "px-3 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-600 font-medium text-center";
+                cell2.textContent = `${option.totalMeters.toFixed(0)} m`;
+
+                // Célula 3: Preço por Metro (o mais importante)
+                let cell3 = row.insertCell();
+                cell3.className = "px-3 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 font-extrabold text-center";
+                cell3.textContent = `R$${option.pricePerMeter.toFixed(3).replace('.', ',')}`; // 3 casas decimais para precisão
+                
+                // Adiciona um ícone de destaque na melhor opção
+                if (isBestValue) {
+                    // Ícone de estrela para melhor valor
+                    cell3.innerHTML += `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1 text-green-600 -mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.68-.921 1.98 0l2.675 8.24a1 1 0 00.95.69h8.653a1 1 0 01.595 1.815l-6.992 5.08a1 1 0 00-.363 1.118l2.675 8.24a1 1 0 01-1.54 1.118l-6.992-5.08a1 1 0 00-1.168 0l-6.992 5.08a1 1 0 01-1.54-1.118l2.675-8.24a1 1 0 00-.363-1.118l-6.992-5.08a1 1 0 01.595-1.815h8.653a1 1 0 00.95-.69l2.675-8.24z" />
+                        </svg>
+                    `;
+                }
+            });
+        }
+
+        /**
+         * Limpa todo o histórico de comparação.
+         */
+        clearButton.addEventListener('click', function() {
+            comparisonData = [];
+            labelCounter = 1;
+            document.getElementById('label').value = `Opção ${labelCounter}`; // Reset label input
+            renderTable();
+        });
+
+    </script>
+</body>
+</html>
